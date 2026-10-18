@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab2-deployment
+  labels:
+    app: lab2-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lab2-app
+  template:
+    metadata:
+      labels:
+        app: lab2-app
+    spec:
+      containers:
+      - name: lab2-app
+        # WE WILL INTENTIONALLY ALTER THIS IMAGE TAG IN PHASE 1 TO TRIGGER ImagePullBackOff
+        image: tamilmani5297/devops-lab2-app:latest
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        envFrom:
+        - configMapRef:
+            name: lab2-config
+        - secretRef:
+            name: lab2-secret
